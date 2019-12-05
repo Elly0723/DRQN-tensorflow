@@ -13,7 +13,13 @@ tensorflow 2.0
 
 1、输入是[1,84,84,3]大小的图片batchsize:4，转化成[?,21168]大小的向量，再reshape成[?,84,84,3]进入四层卷积，经过单元数为512的lstm得到当前隐状态ht,以2:1比例分为advantage 和 value值，计算最终的Qout。
 
-2、targetQ和MainQ用的是同一个Q网络。
+2、targetQ和MainQ用的是同一个Q网络。每5steps用主网络更新目标网络，更新lstm隐藏状态：  
+                if total_steps % (update_freq) == 0:  
+                    updateTarget(targetOps, sess)  
+                    # Reset the recurrent layer's hidden state  
+                    ###################################################更新隐藏状态  
+                    state_train = (np.zeros([batch_size, h_size]), np.zeros([batch_size, h_size]))  
+
 
 3、损失函数为target和Qout的平方误差，计算损失的时，用mask去掉了一半的值（现在还不知道原因）
 
